@@ -3,7 +3,6 @@ package ca.leduotang.inkscapeslide;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.FileOutputStream;
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintStream;
@@ -16,27 +15,22 @@ import java.util.zip.GZIPInputStream;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactoryConfigurationError;
-import javax.xml.xpath.XPathExpressionException;
 
 import ca.leduotang.inkscapeslide.CliParser.Argument;
 import ca.leduotang.inkscapeslide.CliParser.ArgumentMap;
 import ca.uqac.lif.fs.FileSystem;
-import ca.uqac.lif.fs.FileSystemException;
 import ca.uqac.lif.fs.FileUtils;
 import ca.uqac.lif.fs.HardDisk;
 
 import org.apache.pdfbox.multipdf.PDFMergerUtility;
 import org.w3c.dom.Document;
-import org.xml.sax.SAXException;
 
 //import com.itextpdf.text.pdf.PdfReader;
 
 public class Main
 {
-	public static void main(String[] args) throws SAXException, IOException, ParserConfigurationException, FileSystemException, XPathExpressionException, TransformerFactoryConfigurationError, TransformerException
+	public static void main(String[] args) throws TransformerFactoryConfigurationError, Exception
 	{
 		AnsiPrinter stderr = new AnsiPrinter(System.err);
 		AnsiPrinter stdout = new AnsiPrinter(System.out);
@@ -137,12 +131,17 @@ public class Main
 				Thread.currentThread().interrupt();
 			}
 			PDFMergerUtility PDFmerger = new PDFMergerUtility();
-			PDFmerger.setDestinationStream(os);
+			ByteArrayOutputStream pdf_baos = new ByteArrayOutputStream();
+			PDFmerger.setDestinationStream(pdf_baos);
 			for (InkscapeRunnable inkr : pdfs)
 			{
 				PDFmerger.addSource(new ByteArrayInputStream(inkr.getPdfBytes()));
 			}
 			PDFmerger.mergeDocuments(null);
+			// Optimize PDF
+			byte[] optimized = DuplicateFontsRemover.normalizeFile(new ByteArrayInputStream(pdf_baos.toByteArray()));
+			os.write(optimized);
+			os.close();
 			stdout.print("\r\033[2K");
 			stdout.println("Done");
 		}
