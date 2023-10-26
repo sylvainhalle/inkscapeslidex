@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!--
+  Configuration file for AntRun.
+  
+  Use this file to override the default properties contained
+  in build.xml. For example, to override the build.jar.filename
+  property (which sets the name of the compiled jar file), add
+  an element
+  
+  <jar>
+    <filename>inkscapeslide</filename>
+  </jar>
+  
+  inside the <build> element.
+  
+  **Caveat emptor:** in some cases, changing this file and running ant
+  again will result in Ant using a cached version of the old file! Run
+  "ant dummy" to make sure that the correct data is being read. Otherwise
+  you might need to run "ant clean" and start over.
+-->
+<build>
+  <!-- Uncomment any of these if you want to override the build
+       script's default values -->
+
+  <!-- The project's name -->
+  <name>InkscapeSlide X</name>
+
+  <!-- The project's version -->
+  <version>0.1</version>
+
+  <!-- The filename -->
+  <jar>
+    <filename>inkscapeslide</filename>
+  </jar>
+  
+  <!-- The project's author. Currently this only
+  shows up in the footer of the Javadoc documentation. -->
+  <author>Sylvain Hallé</author>
+  
+  <!-- The project's main class -->
+  <mainclass>ca.leduotang.inkscapeslide.Main</mainclass> -->
+  
+  <!-- The target JDK for which we are compiling -->
+  <targetjdk>8</targetjdk>
+
+  <srcdir>Source/src</srcdir>
+  <bindir>Source/bin</bindir>
+  <libdir>Source/lib</libdir>
+  <depdir>Source/dep</depdir>
+  
+  <test>
+    <!-- The filename pattern to recognize test files -->
+    <!-- <filenamepattern>
+           <src>**/*Test.java</src>
+           <bin>**/*Test.class</bin>
+         </filenamepattern> -->
+  </test>
+  
+  <!--
+    Write JAR dependencies here.
+  -->
+  <dependencies>
+    <dependency>
+	  <name>PDFBox</name>
+	  <classname>org.apache.pdfbox.util.Version</classname>
+	  <files>
+		<jar>https://repo1.maven.org/maven2/org/apache/pdfbox/pdfbox/2.0.29/pdfbox-2.0.29.jar</jar>
+		<!-- These are not necessary
+		<jar>http://central.maven.org/maven2/org/apache/pdfbox/fontbox/2.0.0/fontbox-2.0.0.jar</jar>
+		<jar>http://central.maven.org/maven2/org/apache/pdfbox/jempbox/1.8.11/jempbox-1.8.11.jar</jar>
+		<jar>http://central.maven.org/maven2/org/apache/pdfbox/xmpbox/2.0.0/xmpbox-2.0.0.jar</jar>
+		<jar>http://central.maven.org/maven2/org/apache/pdfbox/preflight/2.0.0/preflight-2.0.0.jar</jar>
+		<jar>http://central.maven.org/maven2/org/apache/pdfbox/pdfbox-tools/2.0.0/pdfbox-tools-2.0.0.jar</jar>
+		-->
+	  </files>
+	  <bundle>true</bundle>
+    </dependency>
+    <dependency>
+      <name>Apache Commons Logging</name> <!-- Required by PDFBox -->
+      <classname>org.apache.commons.logging.Log</classname>
+      <files>
+        <jar>https://repo1.maven.org/maven2/commons-logging/commons-logging/1.2/commons-logging-1.2.jar</jar>
+      </files>
+      <bundle>true</bundle>
+    </dependency>
+    <dependency>
+      <name>lif-fs</name>
+      <classname>ca.uqac.lif.fs.FileSystem</classname>
+      <files>
+        <jar>https://github.com/liflab/lif-fs/releases/download/v0.2.1/lif-fs-core-0.2.1.jar</jar>
+      </files>
+      <bundle>true</bundle>
+    </dependency>
+  </dependencies>
+</build>

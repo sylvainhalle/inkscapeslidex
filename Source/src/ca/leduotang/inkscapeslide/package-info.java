@@ -1,0 +1,1 @@
+package ca.leduotang.inkscapeslide;
