@@ -1,0 +1,17 @@
+<S>            := <instruction> | <comment> | <slide> ; 
+
+<slide>        := <additive> | <subtractive> | <normal> ;
+<normal>       := <layers> ;
+<subtractive>  := - <layers> ;
+<additive>     := + <layers> ;
+<layers>       := <layer> , <layers> | <layer> ;
+<layer>        := <layername> * <alpha> | <layername> ;
+<layername>    := ^[\w\-]+;
+<slidename>    := ^[\w\-]+;
+<alpha>        := ^[\d\.]+;
+
+<instruction>  := @ <instbody> ;
+<instbody>     := <template> ;
+<template>     := template: <layers> ;
+
+<comment>      := ^//.*;

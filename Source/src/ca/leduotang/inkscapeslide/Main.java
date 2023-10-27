@@ -2,7 +2,6 @@ package ca.leduotang.inkscapeslide;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintStream;
@@ -94,19 +93,18 @@ public class Main
 			Document doc = builder.parse(is);
 			is.close();
 			doc.getDocumentElement().normalize();
-			Slideshow s = new Slideshow(doc);
-			List<Slide> slides = s.getSlides();
+			CommandInterpreter s = new CommandInterpreter(doc);
+			s.interpret();
+			List<Document> slides = s.getSlides();
 			int total = slides.size();
 			List<InkscapeRunnable> pdfs = new ArrayList<InkscapeRunnable>();
 			StatusCallback status = new StatusCallback(stdout, total);
 			ThreadPoolExecutor executor = (ThreadPoolExecutor) Executors.newFixedThreadPool(num_threads);
 			for (int i = 0; i < slides.size(); i++)
 			{
-				Slide slide = slides.get(i);
-				Document new_doc = s.getSvgSlide(slide);
 				SvgPrinter printer = new SvgPrinter();
 				ByteArrayOutputStream baos = new ByteArrayOutputStream();
-				printer.print(new_doc, baos);
+				printer.print(slides.get(i), baos);
 				InkscapeRunnable inkr = new InkscapeRunnable(baos.toString(), status);
 				pdfs.add(inkr);
 				executor.execute(inkr);
@@ -149,13 +147,6 @@ public class Main
 		// Close file system
 		fs.close();
 	}
-	
-	/*protected static void optimizePdf()
-	{
-		com.itextpdf.text.Document pdfDocument = new com.itextpdf.text.Document();
-		PdfReader pdfReader = null;
-    FileOutputStream fileOutputStream = null;
-	}*/
 	
 	protected static CliParser setupCli()
 	{
