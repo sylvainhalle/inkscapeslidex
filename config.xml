@@ -93,7 +93,7 @@
     </dependency>
     <dependency>
       <name>iText PDF</name>
-      <classname>ca.uqac.lif.fs.FileSystem</classname>
+      <classname>com.itextpdf.text.pdf.PdfReader</classname>
       <files>
         <zip>https://github.com/itext/itextpdf/releases/download/5.5.13.3/itextpdf-5.5.13.3.zip</zip>
       </files>
