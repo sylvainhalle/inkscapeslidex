@@ -51,9 +51,10 @@ public class Main
 		AnsiPrinter stderr = new AnsiPrinter(System.err);
 		AnsiPrinter stdout = new AnsiPrinter(System.out);
 
-		int num_threads = 2;
+		int num_threads = Math.max(1, Runtime.getRuntime().availableProcessors() - 1);
 		String burst = null;
 		String ink_path = "inkscape";
+		boolean first_page_only = false;
 
 		// Parse CLI arguments
 		CliParser parser = setupCli();
@@ -75,6 +76,10 @@ public class Main
 		{
 			ink_path = map.getOptionValue("inkpath");
 		}
+		if (map.hasOption("first-page"))
+		{
+			first_page_only = true;
+		}
 		stdout.println(getGreeting());
 
 		// Get list of files to process
@@ -83,7 +88,7 @@ public class Main
 		{
 			filenames.add("-"); // stdin
 		}
-		FileSystem fs = new HardDisk("/").open();
+		FileSystem fs = new HardDisk().open();
 
 		// Loop for each file
 		for (String filename : filenames)
@@ -120,6 +125,11 @@ public class Main
 			DocumentBuilder builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
 			Document doc = builder.parse(is);
 			is.close();
+			if (doc == null)
+			{
+				stderr.println("Could not parse " + filename + " as an XML document");
+				continue;
+			}
 			doc.getDocumentElement().normalize();
 			List<InkscapeRunnable> pdfs = new ArrayList<InkscapeRunnable>();
 			if (burst != null)
@@ -143,7 +153,7 @@ public class Main
 						SvgPrinter printer = new SvgPrinter();
 						ByteArrayOutputStream baos = new ByteArrayOutputStream();
 						printer.print(e.getValue(), baos);
-						InkscapeRunnable inkr = new NamedInkscapeRunnable(ink_path, burst, layer_filename, baos.toString(), status);
+						InkscapeRunnable inkr = new NamedInkscapeRunnable(ink_path, burst, layer_filename, baos.toString(), status, first_page_only);
 						pdfs.add(inkr);
 						executor.execute(inkr);
 					}
@@ -158,10 +168,15 @@ public class Main
 				StatusCallback status = new StatusCallback(stdout, total);
 				for (int i = 0; i < slides.size(); i++)
 				{
+					Document slide_doc = slides.get(i);
+					if (first_page_only)
+					{
+						SvgProcessor.removeInkscapePages(slide_doc);
+					}
 					SvgPrinter printer = new SvgPrinter();
 					ByteArrayOutputStream baos = new ByteArrayOutputStream();
-					printer.print(slides.get(i), baos);
-					InkscapeRunnable inkr = new InkscapeRunnable(ink_path, baos.toString(), status);
+					printer.print(slide_doc, baos);
+					InkscapeRunnable inkr = new InkscapeRunnable(ink_path, baos.toString(), status, first_page_only);
 					pdfs.add(inkr);
 					executor.execute(inkr);
 				}
@@ -190,9 +205,24 @@ public class Main
 				PDFMergerUtility PDFmerger = new PDFMergerUtility();
 				ByteArrayOutputStream pdf_baos = new ByteArrayOutputStream();
 				PDFmerger.setDestinationStream(pdf_baos);
-				for (InkscapeRunnable inkr : pdfs)
+				boolean error_occurred = false;
+				for (int slide_nb = 0; slide_nb < pdfs.size(); slide_nb++)
 				{
-					PDFmerger.addSource(new ByteArrayInputStream(inkr.getPdfBytes()));
+					InkscapeRunnable inkr = pdfs.get(slide_nb);
+					byte[] pdf_bytes = inkr.getPdfBytes();
+					if (pdf_bytes == null || pdf_bytes.length == 0)
+					{
+						stderr.println("Warning: could not convert slide " + (slide_nb + 1) + " to PDF");
+						error_occurred = true;
+						break;
+					}
+					PDFmerger.addSource(new ByteArrayInputStream(pdf_bytes));
+				}
+				if (error_occurred)
+				{
+					stderr.println("Aborting PDF creation");
+					os.close();
+					continue;
 				}
 				PDFmerger.mergeDocuments(null);
 				// Optimize PDF
@@ -217,6 +247,7 @@ public class Main
 		parser.addArgument(new Argument().withLongName("threads").withArgument("n").withDescription("Use up to n threads"));
 		parser.addArgument(new Argument().withLongName("inkpath").withArgument("path").withDescription("Set path to Inkscape"));
 		parser.addArgument(new Argument().withLongName("help").withDescription("\tShow command usage"));
+		parser.addArgument(new Argument().withLongName("first-page").withShortName("1").withDescription("Consider only the first page"));
 		return parser;
 	}
 

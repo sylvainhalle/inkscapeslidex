@@ -41,6 +41,12 @@ public class StatusCallback
 		printBar();
 	}
 	
+	public void error(String message)
+	{
+		m_out.println();
+		m_out.println("\033[31mError: " + message + "\033[0m");
+	}
+	
 	protected synchronized void printBar()
 	{
 		m_out.print("\r\033[2K");

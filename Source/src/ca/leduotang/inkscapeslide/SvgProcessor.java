@@ -47,7 +47,7 @@ public abstract class SvgProcessor
 	protected final Map<String,Layer> m_layers;
 
 	protected final List<Document> m_slides;
-	
+
 	public SvgProcessor(Document doc) throws CommandException
 	{
 		m_document = doc;
@@ -76,7 +76,7 @@ public abstract class SvgProcessor
 			}
 		}
 	}
-	
+
 	static
 	{
 		try
@@ -86,6 +86,17 @@ public abstract class SvgProcessor
 		catch (ParserConfigurationException e)
 		{
 			// Do nothing for now
+		}
+	}
+
+	//Remove all <inkscape:page> elements anywhere in the document
+	public static void removeInkscapePages(Document doc) {
+		final String INKSCAPE_NS = "http://www.inkscape.org/namespaces/inkscape";
+		NodeList list = doc.getElementsByTagNameNS(INKSCAPE_NS, "page");
+		for (int i = list.getLength() - 1; i >= 0; i--) {
+			Node n = list.item(i);
+			Node parent = n.getParentNode();
+			if (parent != null) parent.removeChild(n);
 		}
 	}
 }

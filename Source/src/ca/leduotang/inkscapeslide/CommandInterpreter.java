@@ -136,12 +136,26 @@ public class CommandInterpreter extends SvgProcessor
 		}
 		{
 			Node orig = (Node) m_xpath.compile("svg/metadata").evaluate(m_document, XPathConstants.NODE);
-			Node new_n = orig.cloneNode(true);
-			new_doc.adoptNode(new_n);
-			svg_root.appendChild(new_n);
+			if (orig == null)
+			{
+				// Some SVG files use the Inkscape namespace for metadata
+				orig = (Node) m_xpath.compile("svg/inkscape:metadata").evaluate(m_document,
+						XPathConstants.NODE);
+			}
+			if (orig != null)
+			{
+				Node new_n = orig.cloneNode(true);
+				new_doc.adoptNode(new_n);
+				svg_root.appendChild(new_n);
+			}
 		}
 		for (LayerOccurrence lo : slide)
 		{
+			int index = getIndex(lo.getName());	
+			if (index == -1)
+			{
+				throw new IllegalArgumentException("No layer named " + lo.getName());
+			}
 			lo.m_order = getIndex(lo.getName());
 		}
 		Collections.sort(slide);
@@ -161,6 +175,10 @@ public class CommandInterpreter extends SvgProcessor
 	
 	protected int getIndex(String layer_name)
 	{
+		if (!m_layers.containsKey(layer_name))
+		{
+			return -1;
+		}
 		return m_layers.get(layer_name).getIndex();
 	}
 	

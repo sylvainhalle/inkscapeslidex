@@ -20,33 +20,57 @@ package ca.leduotang.inkscapeslide;
 public class InkscapeRunnable implements Runnable
 {
 	protected final String m_fileContents;
-	
+
 	protected final StatusCallback m_callback;
-	
+
 	protected byte[] m_pdfBytes = null;
-	
+
 	protected final String m_inkPath; 
-	
-	public InkscapeRunnable(String ink_path, String file_contents, StatusCallback callback)
+
+	protected final boolean m_onlyOnePage;
+
+	public InkscapeRunnable(String ink_path, String file_contents, StatusCallback callback, boolean only_one_page)
 	{
 		super();
 		m_fileContents = file_contents;
 		m_callback = callback;
 		m_inkPath = ink_path;
+		m_onlyOnePage = only_one_page;
 	}
-	
+
 	public byte[] getPdfBytes()
 	{
 		return m_pdfBytes;
 	}
-	
+
 	@Override
 	public void run()
 	{
-		CommandRunner runner = new CommandRunner(new String[] {m_inkPath, "--pipe", "--export-filename=-", "--export-type=pdf"}, m_fileContents);
+		CommandRunner runner;
+		/*if (m_onlyOnePage)
+		{
+			runner = new CommandRunner(new String[] {m_inkPath, "--pipe", "--export-filename=-", "--export-type=pdf", "--export-page=1"}, m_fileContents);
+		}
+		else*/
+		{
+			runner = new CommandRunner(new String[] {m_inkPath, "--pipe", "--export-filename=-", "--export-type=pdf"}, m_fileContents);
+		}
 		runner.run();
 		m_pdfBytes = runner.getBytes();
+		if (m_pdfBytes == null || m_pdfBytes.length == 0)
+		{
+			m_callback.error("Inkscape process did not return any data");
+			m_callback.done();
+			return;
+		}
+		int code = runner.getErrorCode();
+		if (code != 0)
+		{
+			m_callback.error("Inkscape process returned error code " + code);
+		}
 		m_callback.done();
 	}
+	
+	
 
 }

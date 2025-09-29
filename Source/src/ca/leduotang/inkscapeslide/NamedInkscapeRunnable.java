@@ -27,9 +27,9 @@ public class NamedInkscapeRunnable extends InkscapeRunnable
 	
 	protected final String m_exportType;
 	
-	public NamedInkscapeRunnable(String ink_path, String export_type, String filename, String file_contents, StatusCallback callback)
+	public NamedInkscapeRunnable(String ink_path, String export_type, String filename, String file_contents, StatusCallback callback, boolean only_one_page)
 	{
-		super(ink_path, file_contents, callback);
+		super(ink_path, file_contents, callback, only_one_page);
 		m_filename = filename;
 		m_exportType = export_type;
 	}
