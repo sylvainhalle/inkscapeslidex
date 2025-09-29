@@ -8,11 +8,14 @@ public class InkscapeRunnable implements Runnable
 	
 	protected byte[] m_pdfBytes = null;
 	
-	public InkscapeRunnable(String file_contents, StatusCallback callback)
+	protected final String m_inkPath; 
+	
+	public InkscapeRunnable(String ink_path, String file_contents, StatusCallback callback)
 	{
 		super();
 		m_fileContents = file_contents;
 		m_callback = callback;
+		m_inkPath = ink_path;
 	}
 	
 	public byte[] getPdfBytes()
@@ -23,7 +26,7 @@ public class InkscapeRunnable implements Runnable
 	@Override
 	public void run()
 	{
-		CommandRunner runner = new CommandRunner(new String[] {"inkscape", "--pipe", "--export-filename=-", "--export-type=pdf"}, m_fileContents);
+		CommandRunner runner = new CommandRunner(new String[] {m_inkPath, "--pipe", "--export-filename=-", "--export-type=pdf"}, m_fileContents);
 		runner.run();
 		m_pdfBytes = runner.getBytes();
 		m_callback.done();
