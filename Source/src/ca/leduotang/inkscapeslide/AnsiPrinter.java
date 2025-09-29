@@ -1,6 +1,6 @@
 /*
-    Cornipickle, validation of layout bugs in web applications
-    Copyright (C) 2015 Sylvain Hallé
+    Create slideshows from Inkscape SVG files
+    Copyright (C) 2023-2025 Sylvain Hallé
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by

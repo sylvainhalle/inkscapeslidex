@@ -26,11 +26,11 @@
   <name>InkscapeSlide X</name>
 
   <!-- The project's version -->
-  <version>0.1</version>
+  <version>0.2</version>
 
   <!-- The filename -->
   <jar>
-    <filename>inkscapeslide</filename>
+    <filename>inkscapeslidex</filename>
   </jar>
   
   <!-- The project's author. Currently this only
@@ -41,7 +41,7 @@
   <mainclass>ca.leduotang.inkscapeslide.Main</mainclass> -->
   
   <!-- The target JDK for which we are compiling -->
-  <targetjdk>8</targetjdk>
+  <targetjdk>11</targetjdk>
 
   <srcdir>Source/src</srcdir>
   <bindir>Source/bin</bindir>
@@ -87,7 +87,7 @@
       <name>lif-fs</name>
       <classname>ca.uqac.lif.fs.FileSystem</classname>
       <files>
-        <jar>https://github.com/liflab/lif-fs/releases/download/v0.2.1/lif-fs-core-0.2.1.jar</jar>
+        <jar>https://github.com/liflab/lif-fs/releases/download/v0.2.3/lif-fs-core-0.2.3.jar</jar>
       </files>
       <bundle>true</bundle>
     </dependency>
