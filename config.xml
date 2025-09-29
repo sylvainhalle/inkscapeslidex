@@ -77,7 +77,7 @@
     </dependency>
     <dependency>
       <name>Apache Commons Logging</name> <!-- Required by PDFBox -->
-      <classname>org.apache.commons.logging.Log</classname>
+      <classname>org.apache.commons.logging.impl.Jdk13LumberjackLogger</classname>
       <files>
         <jar>https://repo1.maven.org/maven2/commons-logging/commons-logging/1.2/commons-logging-1.2.jar</jar>
       </files>
@@ -93,7 +93,7 @@
     </dependency>
     <dependency>
       <name>iText PDF</name>
-      <classname>com.itextpdf.text.pdf.PdfReader</classname>
+      <classname>com.itextpdf.text.Document</classname>
       <files>
         <zip>https://github.com/itext/itextpdf/releases/download/5.5.13.3/itextpdf-5.5.13.3.zip</zip>
       </files>
