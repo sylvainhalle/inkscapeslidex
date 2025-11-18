@@ -24,6 +24,7 @@ import ca.leduotang.inkscapeslide.LayerCommand.AdditiveSlide;
 import ca.leduotang.inkscapeslide.LayerCommand.NormalSlide;
 import ca.leduotang.inkscapeslide.LayerCommand.SetTemplate;
 import ca.leduotang.inkscapeslide.LayerCommand.SubtractiveSlide;
+import ca.leduotang.inkscapeslide.LayerCommand.XorSlide;
 import ca.uqac.lif.bullwinkle.Builds;
 import ca.uqac.lif.bullwinkle.ParseTreeObjectBuilder;
 
@@ -108,6 +109,16 @@ public class CommandBuilder extends ParseTreeObjectBuilder<Command>
 	public SubtractiveSlide buildSubtractive(Object ... parts)
 	{
 		SubtractiveSlide c = new SubtractiveSlide();
+		List<LayerOccurrence> s = (List<LayerOccurrence>) parts[0];
+		c.addLayers(s);
+		return c;
+	}
+	
+	@SuppressWarnings("unchecked")
+	@Builds(rule = "<xor>", pop = true, clean = true)
+	public XorSlide buildXor(Object ... parts)
+	{
+		XorSlide c = new XorSlide();
 		List<LayerOccurrence> s = (List<LayerOccurrence>) parts[0];
 		c.addLayers(s);
 		return c;

@@ -64,6 +64,7 @@ public abstract class LayerCommand implements Command
 		public void interpret(CommandInterpreter interpreter) throws CommandException
 		{
 			interpreter.setCurrentLayers(m_layers);
+			interpreter.incrementPageNumber();
 			try
 			{
 				interpreter.outputSlide();
@@ -118,6 +119,29 @@ public abstract class LayerCommand implements Command
 		public String toString()
 		{
 			return "-" + super.toString();
+		}
+	}
+	
+	public static class XorSlide extends LayerCommand
+	{
+		@Override
+		public void interpret(CommandInterpreter interpreter) throws CommandException
+		{
+			interpreter.xorCurrentLayers(m_layers);
+			try
+			{
+				interpreter.outputSlide();
+			}
+			catch (XPathExpressionException e)
+			{
+				throw new CommandException(e);
+			}
+		}
+		
+		@Override
+		public String toString()
+		{
+			return "*" + super.toString();
 		}
 	}
 	

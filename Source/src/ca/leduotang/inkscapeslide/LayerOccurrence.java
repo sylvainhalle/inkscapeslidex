@@ -48,6 +48,23 @@ public class LayerOccurrence implements Comparable<LayerOccurrence>
 	{
 		return m_name + (m_alpha < 1 ? "*" + m_alpha : "");
 	}
+	
+	@Override
+	public int hashCode()
+	{
+		return m_name.hashCode();
+	}
+	
+	@Override
+	public boolean equals(Object o)
+	{
+		if (!(o instanceof LayerOccurrence))
+		{
+			return false;
+		}
+		LayerOccurrence l = (LayerOccurrence) o;
+		return l.m_name.compareTo(m_name) == 0;
+	}
 
 	@Override
 	public int compareTo(LayerOccurrence o)

@@ -1,9 +1,10 @@
 <S>            := <instruction> | <comment> | <slide> ; 
 
-<slide>        := <additive> | <subtractive> | <normal> ;
+<slide>        := <additive> | <subtractive> | <xor> | <normal> ;
 <normal>       := <layers> ;
 <subtractive>  := - <layers> ;
 <additive>     := + <layers> ;
+<xor>          := * <layers> ;
 <layers>       := <layer> , <layers> | <layer> ;
 <layer>        := <layername> * <alpha> | <layername> ;
 <layername>    := ^[\w\-]+;
