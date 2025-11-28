@@ -20,6 +20,7 @@ The following code snippet shows an example of the syntax to be used for the "co
 Title
 Background,L1,MyLayer
 +L2
+*L2,L5
 
 //Background,L3
 L4,L5*0.5
@@ -33,9 +34,20 @@ As mentioned above, each line of the box corresponds to one page of the PDF outp
 
 - The third line creates a page whose content is relative to the previous one. The plus sign at the start of the line indicates that new layers are to be added to those of the page that came before. This is useful in the case of animations where the contents of the slide are progressively revealed. In that case, the page will thus be made of layers _Background_, _L1_ ,_ MyLayer_ and _L2_.
 
+- The fourth line is also describes a slide relatively to the previous one, but this time uses the XOR operator (denoted by `*`). Any layers mentioned in this line, and which were present in the previous slide, will be discarded. Conversely, any layers not present in the previous slide but mentioned in the current line will be added. In the present example, the line has for effect of replacing L2 by L5 in a new slide that is otherwise identical to the previous one.
+
 - Blank lines and lines starting with `//` are ignored. It is thus possible to "space out" the contents of the text box and add comments, for example to separate slides into sections. Thus the next two lines in the code example produce no slide.
 
 - The last line in the example shows that layers can be included with a specific transparency (alpha); the `*0.5` after the name of slide _L5_ indicates that the layer will appear in that slide with an alpha value of 0.5 (regardless of the transparency level defined in the original SVG file).
+
+Placeholders
+------------
+
+A few "placeholders" can be put inside the page and be replaced automatically
+by the program when building the slides. Currently a single placeholder is
+supported:
+
+- `@P`: 
 
 Differences with respect to inkscapeslide
 -----------------------------------------
@@ -58,3 +70,5 @@ About the author
 ----------------
 
 The original inkscapeslide script was written in Python by [Alexandre Bourget](https://github.com/abourget). InkscapeSlide X is written by [Sylvain Hallé](https://leduotang.ca/sylvain), Full Professor at [Université du Québec à Chicoutimi](https://www.uqac.ca), Canada.
+
+<!-- :wrap=soft: -->
