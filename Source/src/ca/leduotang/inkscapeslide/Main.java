@@ -1,6 +1,6 @@
 /*
     Create slideshows from Inkscape SVG files
-    Copyright (C) 2023-2025 Sylvain Hallé
+    Copyright (C) 2023-2026 Sylvain Hallé
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -41,7 +41,6 @@ import ca.uqac.lif.fs.FileSystem;
 import ca.uqac.lif.fs.FileUtils;
 import ca.uqac.lif.fs.HardDisk;
 
-import org.apache.pdfbox.multipdf.PDFMergerUtility;
 import org.w3c.dom.Document;
 
 public class Main
@@ -52,8 +51,9 @@ public class Main
 		AnsiPrinter stdout = new AnsiPrinter(System.out);
 
 		int num_threads = Math.max(1, Runtime.getRuntime().availableProcessors() - 1);
-		String burst = null;
+		String out_format = "PDF";
 		String ink_path = "inkscape";
+		boolean burst = false;
 		boolean first_page_only = false;
 
 		// Parse CLI arguments
@@ -70,7 +70,11 @@ public class Main
 		}
 		if (map.hasOption("burst"))
 		{
-			burst = map.getOptionValue("burst");
+			burst = true;
+		}
+		if (map.hasOption("format"))
+		{
+			out_format = map.getOptionValue("format");
 		}
 		if (map.hasOption("inkpath"))
 		{
@@ -132,14 +136,14 @@ public class Main
 			}
 			doc.getDocumentElement().normalize();
 			List<InkscapeRunnable> pdfs = new ArrayList<InkscapeRunnable>();
-			if (burst != null)
+			if (burst)
 			{
 				LayerBurster s = new LayerBurster(doc);
 				Map<String,Document> layers = s.getLayers();
 				StatusCallback status = new StatusCallback(stdout, layers.size());
 				for (Map.Entry<String,Document> e : layers.entrySet())
 				{
-					if (burst.compareTo("svg") == 0)
+					if (out_format.compareTo("svg") == 0)
 					{
 						String layer_filename = e.getKey().concat(".svg");
 						SvgPrinter printer = new SvgPrinter();
@@ -147,13 +151,13 @@ public class Main
 						printer.print(e.getValue(), fos);
 						fos.close();
 					}
-					else if (burst.compareTo("pdf") == 0 || burst.compareTo("png") == 0)
+					else if (out_format.compareTo("pdf") == 0 || out_format.compareTo("png") == 0)
 					{
-						String layer_filename = e.getKey().concat(".").concat(burst);
+						String layer_filename = e.getKey().concat(".").concat(out_format);
 						SvgPrinter printer = new SvgPrinter();
 						ByteArrayOutputStream baos = new ByteArrayOutputStream();
 						printer.print(e.getValue(), baos);
-						InkscapeRunnable inkr = new NamedInkscapeRunnable(ink_path, burst, layer_filename, baos.toString(), status, first_page_only);
+						InkscapeRunnable inkr = new NamedInkscapeRunnable(ink_path, out_format, layer_filename, baos.toString(), status, first_page_only);
 						pdfs.add(inkr);
 						executor.execute(inkr);
 					}
@@ -176,7 +180,7 @@ public class Main
 					SvgPrinter printer = new SvgPrinter();
 					ByteArrayOutputStream baos = new ByteArrayOutputStream();
 					printer.print(slide_doc, baos);
-					InkscapeRunnable inkr = new InkscapeRunnable(ink_path, baos.toString(), status, first_page_only);
+					InkscapeRunnable inkr = new InkscapeRunnable(ink_path, baos.toString(), status, first_page_only, out_format);
 					pdfs.add(inkr);
 					executor.execute(inkr);
 				}
@@ -200,36 +204,32 @@ public class Main
 				// Preserve interrupt status
 				Thread.currentThread().interrupt();
 			}
-			if (burst == null)
+			if (!burst)
 			{
-				PDFMergerUtility PDFmerger = new PDFMergerUtility();
-				ByteArrayOutputStream pdf_baos = new ByteArrayOutputStream();
-				PDFmerger.setDestinationStream(pdf_baos);
-				boolean error_occurred = false;
+				List<byte[]> output_bytes = new ArrayList<byte[]>(pdfs.size());
 				for (int slide_nb = 0; slide_nb < pdfs.size(); slide_nb++)
 				{
 					InkscapeRunnable inkr = pdfs.get(slide_nb);
-					byte[] pdf_bytes = inkr.getPdfBytes();
-					if (pdf_bytes == null || pdf_bytes.length == 0)
-					{
-						stderr.println("Warning: could not convert slide " + (slide_nb + 1) + " to PDF");
-						error_occurred = true;
-						break;
-					}
-					PDFmerger.addSource(new ByteArrayInputStream(pdf_bytes));
+					byte[] bytes = inkr.getOutputBytes();
+					output_bytes.add(bytes);
 				}
-				if (error_occurred)
+				Exporter exporter = null;
+				if (out_format.compareTo("png") == 0)
 				{
-					stderr.println("Aborting PDF creation");
-					os.close();
+					exporter = new AnimatedPngExporter(1, os);
+				}
+				else if (out_format.compareTo("pdf") == 0)
+				{
+					exporter = new MultipagePdfExporter(stdout, stderr, os);
+				}
+				else
+				{
+					stderr.println("Unsupported output format: " + out_format);
 					continue;
 				}
-				PDFmerger.mergeDocuments(null);
-				// Optimize PDF
-				byte[] optimized = DuplicateFontsRemover.normalizeFile(new ByteArrayInputStream(pdf_baos.toByteArray()));
-				os.write(optimized);
-				os.close();
+				exporter.export(output_bytes);
 			}
+			os.close();
 			stdout.print("\r\033[2K");
 			stdout.println("Done");
 		}
@@ -243,7 +243,8 @@ public class Main
 	protected static CliParser setupCli()
 	{
 		CliParser parser = new CliParser();
-		parser.addArgument(new Argument().withLongName("burst").withArgument("format").withDescription("Burst layers into separate files of format"));
+		parser.addArgument(new Argument().withLongName("burst").withDescription("Burst layers into separate files"));
+		parser.addArgument(new Argument().withLongName("format").withArgument("fmt").withDescription("Set output format (PDF or PNG)"));
 		parser.addArgument(new Argument().withLongName("threads").withArgument("n").withDescription("Use up to n threads"));
 		parser.addArgument(new Argument().withLongName("inkpath").withArgument("path").withDescription("Set path to Inkscape"));
 		parser.addArgument(new Argument().withLongName("help").withDescription("\tShow command usage"));
@@ -255,8 +256,8 @@ public class Main
 	{
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		PrintStream ps = new PrintStream(baos);
-		ps.println("InkscapeSlide X version 0.2");
-		ps.println("(C) 2023-2025 Sylvain Hallé, Université du Québec à Chicoutimi, Canada");
+		ps.println("InkscapeSlide X version 0.3");
+		ps.println("(C) 2023-2026 Sylvain Hallé, Université du Québec à Chicoutimi, Canada");
 		return baos.toString();
 	}
 

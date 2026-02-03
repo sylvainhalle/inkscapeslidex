@@ -23,24 +23,27 @@ public class InkscapeRunnable implements Runnable
 
 	protected final StatusCallback m_callback;
 
-	protected byte[] m_pdfBytes = null;
+	protected byte[] m_outputBytes = null;
 
 	protected final String m_inkPath; 
 
 	protected final boolean m_onlyOnePage;
+	
+	protected final String m_outFormat;
 
-	public InkscapeRunnable(String ink_path, String file_contents, StatusCallback callback, boolean only_one_page)
+	public InkscapeRunnable(String ink_path, String file_contents, StatusCallback callback, boolean only_one_page, String out_format)
 	{
 		super();
 		m_fileContents = file_contents;
 		m_callback = callback;
 		m_inkPath = ink_path;
 		m_onlyOnePage = only_one_page;
+		m_outFormat = out_format.toLowerCase();
 	}
 
-	public byte[] getPdfBytes()
+	public byte[] getOutputBytes()
 	{
-		return m_pdfBytes;
+		return m_outputBytes;
 	}
 
 	@Override
@@ -53,11 +56,11 @@ public class InkscapeRunnable implements Runnable
 		}
 		else*/
 		{
-			runner = new CommandRunner(new String[] {m_inkPath, "--pipe", "--export-filename=-", "--export-type=pdf"}, m_fileContents);
+			runner = new CommandRunner(new String[] {m_inkPath, "--pipe", "--export-filename=-", "--export-type=" + m_outFormat}, m_fileContents);
 		}
 		runner.run();
-		m_pdfBytes = runner.getBytes();
-		if (m_pdfBytes == null || m_pdfBytes.length == 0)
+		m_outputBytes = runner.getBytes();
+		if (m_outputBytes == null || m_outputBytes.length == 0)
 		{
 			m_callback.error("Inkscape process did not return any data");
 			m_callback.done();

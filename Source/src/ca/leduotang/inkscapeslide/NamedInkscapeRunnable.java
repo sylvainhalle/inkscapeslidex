@@ -1,6 +1,6 @@
 /*
     Create slideshows from Inkscape SVG files
-    Copyright (C) 2023-2025 Sylvain Hallé
+    Copyright (C) 2023-2026 Sylvain Hallé
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -24,36 +24,38 @@ import java.io.IOException;
 public class NamedInkscapeRunnable extends InkscapeRunnable
 {
 	protected final String m_filename;
-	
-	protected final String m_exportType;
-	
+
 	public NamedInkscapeRunnable(String ink_path, String export_type, String filename, String file_contents, StatusCallback callback, boolean only_one_page)
 	{
-		super(ink_path, file_contents, callback, only_one_page);
+		super(ink_path, file_contents, callback, only_one_page, export_type);
 		m_filename = filename;
-		m_exportType = export_type;
 	}
-	
+
 	@Override
 	public void run()
 	{
 		String[] arguments;
-		if (m_exportType.compareToIgnoreCase("PDF") == 0)
+		if (m_outFormat.compareToIgnoreCase("PDF") == 0)
 		{
-			arguments = new String[] {m_inkPath, "--pipe", "--export-filename=-", "--export-type=" + m_exportType};
+			arguments = new String[] {m_inkPath, "--pipe", "--export-filename=-", "--export-type=" + m_outFormat};
+		}
+		else if (m_outFormat.compareToIgnoreCase("PNG") == 0)
+		{
+			// Assume PNG exported at 600 dpi
+			arguments = new String[] {m_inkPath, "--pipe", "--export-filename=-", "--export-type=" + m_outFormat, "--export-dpi=600"};
 		}
 		else
 		{
-			// Assume PNG exported at 600 dpi
-			arguments = new String[] {m_inkPath, "--pipe", "--export-filename=-", "--export-type=" + m_exportType, "--export-dpi=600"};
+			m_callback.error("Unsupported export type: " + m_outFormat);
+			return;
 		}
 		CommandRunner runner = new CommandRunner(arguments, m_fileContents);
 		runner.run();
-		m_pdfBytes = runner.getBytes();
+		m_outputBytes = runner.getBytes();
 		File output_file = new File(m_filename);
 		try (FileOutputStream outputStream = new FileOutputStream(output_file)) 
 		{
-	    outputStream.write(m_pdfBytes);
+			outputStream.write(m_outputBytes);
 		}
 		catch (IOException e)
 		{
