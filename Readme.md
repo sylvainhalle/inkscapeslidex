@@ -43,11 +43,19 @@ As mentioned above, each line of the box corresponds to one page of the PDF outp
 Placeholders
 ------------
 
-A few "placeholders" can be put inside the page and be replaced automatically
-by the program when building the slides. Currently a single placeholder is
-supported:
+A few "placeholders" can be put inside the page and be replaced automatically by the program when building the slides. Currently a single placeholder is supported:
 
-- `@P`: 
+- `@P`: prints the page (i.e. slide) number
+
+Export formats
+--------------
+
+By default, the program generates a multi-page PDF file. The `--format` option allows the user to specify an output to two other file formats:
+
+- `png`: produces an [animated PNG](https://en.wikipedia.org/wiki/APNG) file
+- `gif`: produces an [animated GIF](https://en.wikipedia.org/wiki/GIF#Animated_GIF) file
+
+For these two options to work, [ImageMagick](https://imagemagick.org/) must be installed on the host machine.
 
 Differences with respect to inkscapeslide
 -----------------------------------------
@@ -65,6 +73,8 @@ The program is meant to be used as a drop-in replacement for the original script
 - The original script merged each PDF slide with its own embedded fonts, which resulted in duplicates. This new program does the same but attempts to eliminate duplicates when it can (though this is not perfect), resulting in a smaller output file size (anecdotal evidence shows a reduction of about 30%).
 
 - The `content` layer allows extended syntax, such as the use of `//` to ignore some lines in the text box (see details above). Additional syntactical extensions are expected in future versions.
+
+- Export can be made as animated GIFs or PNGs in addition to PDFs.
 
 About the author
 ----------------

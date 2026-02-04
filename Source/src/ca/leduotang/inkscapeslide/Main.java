@@ -51,7 +51,7 @@ public class Main
 		AnsiPrinter stdout = new AnsiPrinter(System.out);
 
 		int num_threads = Math.max(1, Runtime.getRuntime().availableProcessors() - 1);
-		String out_format = "PDF";
+		String out_format = "pdf";
 		String ink_path = "inkscape";
 		boolean burst = false;
 		boolean first_page_only = false;
@@ -118,11 +118,11 @@ public class Main
 				byte[] unzipped_bytes = FileUtils.toBytes(gzis);
 				is.close();
 				is = new ByteArrayInputStream(unzipped_bytes);
-				out_filename = filename.replace("svgz", "pdf");
+				out_filename = filename.replace("svgz", out_format);
 			}
 			else
 			{
-				out_filename = filename.replace("svg", "pdf");
+				out_filename = filename.replace("svg", out_format);
 			}
 			ThreadPoolExecutor executor = (ThreadPoolExecutor) Executors.newFixedThreadPool(num_threads);
 			OutputStream os = fs.writeTo(out_filename);
@@ -216,7 +216,11 @@ public class Main
 				Exporter exporter = null;
 				if (out_format.compareTo("png") == 0)
 				{
-					exporter = new AnimatedPngExporter(1, os);
+					exporter = new AnimatedBitmapExporter(AnimatedBitmapExporter.Format.APNG, 1, os);
+				}
+				else if (out_format.compareTo("gif") == 0)
+				{
+					exporter = new AnimatedBitmapExporter(AnimatedBitmapExporter.Format.GIF, 1, os);
 				}
 				else if (out_format.compareTo("pdf") == 0)
 				{
