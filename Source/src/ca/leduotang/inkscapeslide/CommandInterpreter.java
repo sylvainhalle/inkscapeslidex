@@ -80,9 +80,10 @@ public class CommandInterpreter extends SvgProcessor
 			Node n = (Node) m_xpath.compile("//g[@groupmode='layer' and @label='content']").evaluate(doc, XPathConstants.NODE);
 			parseInstructions(n);
 		}
-		catch (XPathExpressionException e)
+		catch (XPathExpressionException | InvalidGrammarException e)
 		{
-			throw new CommandException(e);
+			// Should not happen, since the XPath expression *is* valid
+			// and the grammar file *is* valid
 		}
 	}
 
@@ -109,18 +110,11 @@ public class CommandInterpreter extends SvgProcessor
 	 * grammar defined in grammar.bnf.
 	 * @param n The node containing the instructions
 	 * @throws CommandException If an error occurs during parsing
+	 * @throws InvalidGrammarException If the grammar file is invalid
 	 */
-	protected void parseInstructions(Node n) throws CommandException
+	protected void parseInstructions(Node n) throws InvalidGrammarException, CommandException
 	{
-		BnfParser parser;
-		try
-		{
-			parser = new BnfParser(CommandInterpreter.class.getResourceAsStream("grammar.bnf"));
-		}
-		catch (InvalidGrammarException e)
-		{
-			throw new CommandException(e);
-		}
+		BnfParser parser = new BnfParser(CommandInterpreter.class.getResourceAsStream("grammar.bnf"));
 		NodeList lines = null;
 		try
 		{
@@ -128,7 +122,7 @@ public class CommandInterpreter extends SvgProcessor
 		}
 		catch (XPathExpressionException e)
 		{
-			throw new CommandException(e);
+			// Should not happen, since the XPath expression *is* valid
 		}
 		for (int i = 0; i < lines.getLength(); i++)
 		{
@@ -145,7 +139,7 @@ public class CommandInterpreter extends SvgProcessor
 			}
 			catch (ParseException e)
 			{
-				throw new CommandException(e);
+				throw new CommandException(e, i);
 			}
 			CommandBuilder builder = new CommandBuilder();
 			Command c;
@@ -156,7 +150,7 @@ public class CommandInterpreter extends SvgProcessor
 			}
 			catch (BuildException e)
 			{
-				throw new CommandException(e);
+				throw new CommandException(e, i);
 			}
 		}
 	}
@@ -229,6 +223,10 @@ public class CommandInterpreter extends SvgProcessor
 				Element new_n = (Element) l.getContent().cloneNode(true);
 				applyReplacements(new_n);
 				new_n.setAttribute("style", "");
+				if (lo.getAlpha() < 1)
+				{
+					new_n.setAttribute("opacity", Float.toString(lo.getAlpha()));
+				}
 				new_doc.adoptNode(new_n);
 				svg_root.appendChild(new_n);
 			}

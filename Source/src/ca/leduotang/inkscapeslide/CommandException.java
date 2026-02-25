@@ -20,13 +20,28 @@ package ca.leduotang.inkscapeslide;
 public class CommandException extends Exception
 {
 	/**
+	 * The line number in the SVG layer where the error occurred.
+	 */
+	protected final int m_line;
+	
+	/**
 	 * Dummy UID.
 	 */
 	private static final long serialVersionUID = 1L;
 	
-	public CommandException(Throwable t)
+	public CommandException(Throwable t, int line)
 	{
 		super(t);
+		m_line = line;
+	}
+	
+	/**
+	 * Get the line number in the SVG layer where the error occurred.
+	 * @return The line number in the SVG layer where the error occurred.
+	 */
+	public int getLine()
+	{
+		return m_line;
 	}
 
 }

@@ -60,7 +60,7 @@ public abstract class SvgProcessor
 		}
 		catch (XPathExpressionException e)
 		{
-			throw new CommandException(e);
+			throw new CommandException(e, -1);
 		}
 		for (int i = 0; i < list.getLength(); i++)
 		{

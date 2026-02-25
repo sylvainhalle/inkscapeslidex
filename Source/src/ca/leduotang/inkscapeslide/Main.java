@@ -45,8 +45,43 @@ import org.w3c.dom.Document;
 
 public class Main
 {
+	/**
+	 * Return code for successful execution.
+	 */
+	protected static final int RET_OK = 0;
+	
+	/**
+	 * Return code for execution with errors.
+	 */
+	protected static final int RET_ERROR = 1;
+	
+	/**
+	 * Return code for execution with syntax errors in the SVG layer.
+	 */
+	protected static final int RET_SYNTAX = 2;
+	
+	/**
+	 * Main method for the command line interface.
+	 * @param args Command line arguments
+	 * @throws TransformerFactoryConfigurationError
+	 * @throws Exception
+	 */
 	public static void main(String[] args) throws TransformerFactoryConfigurationError, Exception
 	{
+		int code = doMain(args);
+		System.exit(code);
+	}
+	
+	/**
+	 * Main method for the command line interface, with error code return.
+	 * @param args
+	 * @return
+	 * @throws TransformerFactoryConfigurationError
+	 * @throws Exception
+	 */
+	private static int doMain(String[] args) throws TransformerFactoryConfigurationError, Exception
+	{
+		int ret_code = RET_OK;
 		AnsiPrinter stderr = new AnsiPrinter(System.err);
 		AnsiPrinter stdout = new AnsiPrinter(System.out);
 
@@ -165,27 +200,39 @@ public class Main
 			}
 			else
 			{
-				CommandInterpreter s = new CommandInterpreter(doc);
-				s.interpret();
-				List<Document> slides = s.getSlides();
-				int total = slides.size();
-				StatusCallback status = new StatusCallback(stdout, total);
-				for (int i = 0; i < slides.size(); i++)
+				try
 				{
-					Document slide_doc = slides.get(i);
-					if (first_page_only)
+					CommandInterpreter s = new CommandInterpreter(doc);
+					s.interpret();
+					List<Document> slides = s.getSlides();
+					int total = slides.size();
+					StatusCallback status = new StatusCallback(stdout, total);
+					for (int i = 0; i < slides.size(); i++)
 					{
-						SvgProcessor.removeInkscapePages(slide_doc);
+						Document slide_doc = slides.get(i);
+						if (first_page_only)
+						{
+							SvgProcessor.removeInkscapePages(slide_doc);
+						}
+						SvgPrinter printer = new SvgPrinter();
+						ByteArrayOutputStream baos = new ByteArrayOutputStream();
+						printer.print(slide_doc, baos);
+						InkscapeRunnable inkr = new InkscapeRunnable(ink_path, baos.toString(), status, first_page_only, out_format);
+						pdfs.add(inkr);
+						executor.execute(inkr);
 					}
-					SvgPrinter printer = new SvgPrinter();
-					ByteArrayOutputStream baos = new ByteArrayOutputStream();
-					printer.print(slide_doc, baos);
-					InkscapeRunnable inkr = new InkscapeRunnable(ink_path, baos.toString(), status, first_page_only, out_format);
-					pdfs.add(inkr);
-					executor.execute(inkr);
+				}
+				catch (CommandException e)
+				{
+					stderr.println("Invalid syntax on line " + e.getLine());
+					ret_code = RET_SYNTAX;
 				}
 			}
 			executor.shutdown();
+			if (ret_code != RET_OK)
+			{
+				return ret_code;
+			}
 			try
 			{
 				if (!executor.awaitTermination(120, TimeUnit.SECONDS))
@@ -242,6 +289,7 @@ public class Main
 		fs.close();
 		stderr.close();
 		stdout.close();
+		return ret_code;
 	}
 
 	protected static CliParser setupCli()

@@ -71,7 +71,7 @@ public abstract class LayerCommand implements Command
 			}
 			catch (XPathExpressionException e)
 			{
-				throw new CommandException(e);
+				throw new CommandException(e, -1);
 			}
 		}
 	}
@@ -88,7 +88,7 @@ public abstract class LayerCommand implements Command
 			}
 			catch (XPathExpressionException e)
 			{
-				throw new CommandException(e);
+				throw new CommandException(e, -1);
 			}
 		}
 		
@@ -111,7 +111,7 @@ public abstract class LayerCommand implements Command
 			}
 			catch (XPathExpressionException e)
 			{
-				throw new CommandException(e);
+				throw new CommandException(e, -1);
 			}
 		}
 		
@@ -134,7 +134,7 @@ public abstract class LayerCommand implements Command
 			}
 			catch (XPathExpressionException e)
 			{
-				throw new CommandException(e);
+				throw new CommandException(e, -1);
 			}
 		}
 		
