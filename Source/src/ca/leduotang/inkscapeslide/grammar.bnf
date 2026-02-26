@@ -1,10 +1,13 @@
 <S>            := <instruction> | <comment> | <slide> ; 
 
-<slide>        := <additive> | <subtractive> | <xor> | <normal> ;
+<slide>        := <additive> | <subtractive> | <xor> | <loop> | <normal> ;
 <normal>       := <layers> ;
 <subtractive>  := - <layers> ;
 <additive>     := + <layers> ;
 <xor>          := * <layers> ;
+<loop>         := <l_additive> | <l_xor> | <l_normal> ;
+<l_additive>   := #+ <layername> ;
+<l_normal>     := # <layername> ;
 <layers>       := <layer> , <layers> | <layer> ;
 <layer>        := <layername> * <alpha> | <layername> ;
 <layername>    := ^[\w\-]+;

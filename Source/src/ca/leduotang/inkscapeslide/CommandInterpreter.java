@@ -86,6 +86,11 @@ public class CommandInterpreter extends SvgProcessor
 			// and the grammar file *is* valid
 		}
 	}
+	
+	public List<String> getAllLayerNames()
+	{
+		return new ArrayList<String>(m_layers.keySet());
+	}
 
 	/**
 	 * Indicates that the interpreter should move to the next page. This method
