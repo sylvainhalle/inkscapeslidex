@@ -127,13 +127,19 @@ public class CommandBuilder extends ParseTreeObjectBuilder<Command>
 	@Builds(rule = "<l_additive>", pop = true, clean = true)
 	public LoopCommand buildAddLoop(Object ... parts)
 	{
-		return new LoopCommand.AdditiveLoop((LayerOccurrence) parts[0]);
+		return new LoopCommand.AdditiveLoop((String) parts[0]);
 	}
 	
 	@Builds(rule = "<l_normal>", pop = true, clean = true)
 	public LoopCommand buildNormalLoop(Object ... parts)
 	{
-		return new LoopCommand.NormalLoop((LayerOccurrence) parts[0]);
+		return new LoopCommand.NormalLoop((String) parts[0]);
+	}
+	
+	@Builds(rule = "<l_xor>", pop = true, clean = true)
+	public LoopCommand buildXorLoop(Object ... parts)
+	{
+		return new LoopCommand.XorLoop((String) parts[0]);
 	}
 	
 	@SuppressWarnings("unchecked")

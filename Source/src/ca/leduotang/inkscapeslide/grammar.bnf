@@ -6,12 +6,14 @@
 <additive>     := + <layers> ;
 <xor>          := * <layers> ;
 <loop>         := <l_additive> | <l_xor> | <l_normal> ;
-<l_additive>   := #+ <layername> ;
-<l_normal>     := # <layername> ;
+<l_additive>   := %+ <pattern> ;
+<l_xor>        := %* <pattern> ;
+<l_normal>     := % <pattern> ;
 <layers>       := <layer> , <layers> | <layer> ;
 <layer>        := <layername> * <alpha> | <layername> ;
 <layername>    := ^[\w\-]+;
 <slidename>    := ^[\w\-]+;
+<pattern>      := ^.*;
 <alpha>        := ^[\d\.]+;
 
 <instruction>  := @ <instbody> ;

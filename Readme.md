@@ -24,6 +24,7 @@ Background,L1,MyLayer
 
 //Background,L3
 L4,L5*0.5
+%M\d
 ```
 
 As mentioned above, each line of the box corresponds to one page of the PDF output.
@@ -38,7 +39,12 @@ As mentioned above, each line of the box corresponds to one page of the PDF outp
 
 - Blank lines and lines starting with `//` are ignored. It is thus possible to "space out" the contents of the text box and add comments, for example to separate slides into sections. Thus the next two lines in the code example produce no slide.
 
-- The last line in the example shows that layers can be included with a specific transparency (alpha); the `*0.5` after the name of slide _L5_ indicates that the layer will appear in that slide with an alpha value of 0.5 (regardless of the transparency level defined in the original SVG file).
+- The next-to-last line in the example shows that layers can be included with a specific transparency (alpha); the `*0.5` after the name of slide _L5_ indicates that the layer will appear in that slide with an alpha value of 0.5 (regardless of the transparency level defined in the original SVG file).
+
+- Finally, the last line is a _slide pattern_. It starts with the `%` symbol, followed by an arbitrary [regular expression](https://en.wikipedia.org/wiki/Regular_expression). When encountering such a line, Inkscapeslide fetches all the layers whose name matches the regular expression, and adds them as a sequence of slides in alphabetical order. For example, if the document has layers named M1, M2 and M3, those three layers will be inserted as three slides in place of the slide pattern. Slide patterns can also start with:
+
+  - `%+`: in such a case, the layers are successively _added_ to the set of displayed layers. Thus in the example above, writing `%+M\d` is equivalent to the three lines `+M1`, `+M2`, `+M3`.
+  - `%*`: in such a case, the layers are successively _xored_ to the set of displayed layers. Thus in the example above, writing `%*M\d` is equivalent to the three lines `*M1`, `*M1,M2`, `*M2,M3`.
 
 Placeholders
 ------------
